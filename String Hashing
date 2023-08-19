@@ -1,0 +1,44 @@
+//Leetcode 187
+ 
+ int p = 31,p2=29;
+    int mod=1e9+7,mod2=1044999983;
+    vector<string> ans;
+    vector<string> findRepeatedDnaSequences(string s) {
+        int n = s.size();
+        vector<long long> v(n,0),v2(n,0),po(n,1),po2(n,1);
+        v[0] = s[0]-'A'+1;
+        v2[0] = s[0]-'A'+1;
+        long long x=p,y=p2;
+        for(int i=1;i<n;i++){
+            v[i] = ( v[i-1] + ( (s[i]-'A'+1)*x ) %mod + mod )%mod;
+            v2[i] = ( v2[i-1] + ( (s[i]-'A'+1)*y ) %mod2 + mod2 )%mod2;
+            po[i] = x%mod;
+            x = (x*p)%mod;
+            po2[i] = y%mod2;
+            y = (y*p2)%mod2;
+
+        }
+
+        map<pair<int,int>,int> mp;
+
+        for(int i=0;i<n-10+1;i++){
+            int r = i+10-1;
+            int sub = i==0 ? 0 : v[i-1];
+            int sub2 = i==0 ? 0 : v2[i-1];
+            int val = ( ( (v[r] - sub + mod)%mod )*po[n-i-1] )%mod;
+            int val2 = ( ( (v2[r] - sub2 + mod2)%mod2 )*po2[n-i-1] )%mod2;
+
+            if(mp.find({val,val2})!=mp.end() && mp[{val,val2}]==1){
+                string s1 = s.substr(i,10);
+                ans.push_back(s1);
+                mp[{val,val2}]++;
+            }
+
+                mp[{val,val2}]++;
+        }
+
+        // for(auto e:mp){
+        //     if(e.second>1) ans.push_back(e.first);
+        // }
+        return ans;
+        }
