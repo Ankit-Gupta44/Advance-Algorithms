@@ -1,0 +1,160 @@
+#include<bits/stdc++.h>
+#define int long long
+using namespace std;
+
+struct segmenttree
+{
+    int n;
+    vector<int> st, lazy, islazy;
+
+    void init(int _n)
+    {
+        this->n = _n;
+        st.resize(4 * n, 0);
+        lazy.resize(4 * n, 0);
+        islazy.resize(4 * n, 0);
+    }
+
+    int combine(int a, int b)
+    {
+        return min(a, b);
+    }
+
+    void push(int start, int ending, int node)
+    {
+        if (islazy[node])
+        {
+            st[node] = (lazy[node] + st[node]);
+
+            if (start != ending)
+            {
+                lazy[2 * node + 1] = (lazy[2 * node + 1] + lazy[node]);
+                lazy[2 * node + 2] = (lazy[2 * node + 2] + lazy[node]);
+                islazy[2 * node + 1] = islazy[2 * node + 2] = 1;
+            }
+
+            islazy[node] = lazy[node] = 0;
+        }
+    }
+
+    void build(int start, int ending, int node, vector<int> &v)
+    {
+        // leaf node base case
+        if (start == ending)
+        {
+            st[node] = v[start];
+            return;
+        }
+
+        int mid = (start + ending) / 2;
+
+        build(start, mid, 2 * node + 1, v);
+
+        build(mid + 1, ending, 2 * node + 2, v);
+
+        st[node] = combine(st[node * 2 + 1], st[node * 2 + 2]);
+    }
+
+    int query(int start, int ending, int l, int r, int node)
+    {
+        push(start, ending, node);
+
+        if (start > r || ending < l)
+        {
+            return LLONG_MAX;
+        }
+
+        if (start >= l && ending <= r)
+        {
+            return st[node];
+        }
+
+        int mid = (start + ending) / 2;
+
+        int q1 = query(start, mid, l, r, 2 * node + 1);
+        int q2 = query(mid + 1, ending, l, r, 2 * node + 2);
+
+        return combine(q1, q2);
+    }
+
+    void update(int start, int ending, int node, int l, int r, int value)
+    {
+        push(start, ending, node);
+
+        if (start > r || ending < l)
+        {
+            return;
+        }
+
+        if (start >= l && ending <= r)
+        {
+            st[node] = (st[node] + value);
+
+            if (start != ending)
+            {
+                lazy[2 * node + 1] = (lazy[2 * node + 1] + value);
+                lazy[2 * node + 2] = (lazy[2 * node + 2] + value);
+                islazy[2 * node + 1] = islazy[2 * node + 2] = 1;
+            }
+            
+            return;
+        }
+
+        int mid = (start + ending) / 2;
+
+        update(start, mid, 2 * node + 1, l, r, value);
+
+        update(mid + 1, ending, 2 * node + 2, l, r, value);
+
+        st[node] = combine(st[node * 2 + 1], st[node * 2 + 2]);
+
+        return;
+    }
+
+    void build(vector<int> &v)
+    {
+        build(0, n - 1, 0, v);
+    }
+
+    int query(int l, int r)
+    {
+        return query(0, n - 1, l, r, 0);
+    }
+
+    void update(int l, int r, int x)
+    {
+        update(0, n - 1, 0, l, r, x);
+    }
+};
+
+int32_t main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    #ifndef ONLINE_JUDGE
+    freopen("input.txt", "r", stdin);
+    freopen("output.txt", "w", stdout);
+    #endif
+
+    int n, m; cin >> n >> m;
+
+    segmenttree tree; tree.init(n);
+
+    for(int i = 0; i < m; i++)
+    {
+        int type; cin >> type;
+
+        if(type == 1)
+        {
+            int l, r, v; cin >> l >> r >> v;
+            tree.update(l, r - 1, v);
+        }
+
+        if(type == 2)
+        {
+            int l, r; cin >> l >> r;
+            cout << tree.query(l, r - 1) << "\n";
+        }
+    }
+}
