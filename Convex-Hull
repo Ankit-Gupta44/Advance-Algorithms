@@ -1,0 +1,129 @@
+//  Leetcode - 587. Erect the Fence //
+
+class Solution {
+public:
+    static bool comp( vector<int>&a, vector<int>&b ){
+        if( a[0] == b[0] ) return a[1] > b[1];
+        return a[0] < b[0];
+    }
+    static bool comp2( vector<int>&a, vector<int>&b ){
+        if( a[0] == b[0] ) return a[1] < b[1];
+        return a[0] < b[0];
+    }
+
+    double calculateSlope(int x1, int y1, int x2, int y2, int ms) {
+        
+        if (x2 - x1 == 0) {
+            return y2 - y1 >= 0 ? INT_MAX : INT_MIN; 
+        }
+        
+        return (double)(y2 - y1) / (x2 - x1);
+    }
+
+    int ankit( vector<int>&a, vector<int>&b, vector<int>&c, int ms ){
+
+        double slopeAB = calculateSlope(a[0], a[1], b[0], b[1], ms);
+        double slopeAC = calculateSlope(a[0], a[1], c[0], c[1], ms);
+
+        if( slopeAB == slopeAC ) return 0;
+        if( slopeAB < slopeAC ) return 1;
+        if( slopeAB > slopeAC ) return 2;
+
+        return 4;
+    }
+
+    vector<vector<int>> outerTrees(vector<vector<int>>& tree) {
+
+        if( tree.size() <= 3  ) return tree;
+        
+        vector<vector<int>> ans,upHull,downHull;
+        sort(tree.begin(),tree.end(),comp);
+
+        upHull.push_back(tree[0]);
+        upHull.push_back(tree[1]);
+
+        for(int i=2;i<tree.size();i++){
+
+            while( upHull.size() >= 2 ){
+
+                int ms = ankit(upHull[ upHull.size()-2 ], upHull[ upHull.size()-1 ], tree[i] , 1);
+
+                if( ms == 1 ){ 
+                    upHull.pop_back();
+                    if( upHull.size() == 1 ){
+                        upHull.push_back(tree[i]);
+                        break;
+                    }
+                }
+                else if( ms == 0 || ms == 2 ){
+                    upHull.push_back(tree[i]);
+                    break;
+                }
+
+            }
+
+        }
+
+        // for(auto e : upHull){
+        //     cout<<e[0]<<" "<<e[1]<<endl;
+        // }
+
+        sort(tree.begin(),tree.end(),comp2);
+
+        downHull.push_back(tree[0]);
+        downHull.push_back(tree[1]);
+
+        for(int i=2;i<tree.size();i++){
+
+            while( downHull.size() >= 2 ){
+
+                int ms = ankit(downHull[ downHull.size()-2 ], downHull[ downHull.size()-1 ], tree[i], 2);
+
+                if( ms == 2 ){ 
+                    downHull.pop_back();
+                    if( downHull.size() == 1 ){
+                        downHull.push_back(tree[i]);
+                        break;
+                    }
+                }
+                else if( ms == 0 || ms == 1 ){
+                    downHull.push_back(tree[i]);
+                    break;
+                }
+
+            }
+
+        }
+
+        // for(auto e : downHull){
+        //     cout<<e[0]<<" "<<e[1]<<endl;
+        // }
+
+        set<pair<int, int>> set;
+
+        for(int i=0;i<tree.size();i++){
+
+            if( tree[i][0] == tree[0][0] ) set.insert({tree[i][0], tree[i][1]});
+            if( tree[i][0] == tree[tree.size()-1][0] ) set.insert({tree[i][0], tree[i][1]});
+
+        }
+
+        for (const auto& vec : upHull) {
+            set.insert({vec[0], vec[1]});
+        }
+
+        for (const auto& vec : downHull) {
+            set.insert({vec[0], vec[1]});
+        }
+
+        for( auto e : set ){
+
+            ans.push_back({ e.first,e.second });
+
+        }
+
+        
+
+        return ans;
+    }
+};
