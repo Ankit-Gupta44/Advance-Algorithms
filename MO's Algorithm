@@ -1,0 +1,123 @@
+https://www.spoj.com/problems/DQUERY/
+
+
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#define endl '\n'
+#define f first
+#define s second
+
+int dp[1000004];
+
+bool comp(const vector<int>& a, const vector<int>& b) {
+  
+    if ( a[0] != b[0] )
+        return a[0] < b[0];
+    
+    return a[2] < b[2];
+    
+}
+
+
+signed main() {
+  
+    ios::sync_with_stdio(0);
+    cin.tie(0);cout.tie(NULL);
+    
+    // memset(dp,0,sizeof(dp));
+  	
+  	int n;  cin>>n; 
+  	int size = ceil(sqrt(n));
+  	
+  	vector<int> v(n);
+  	for(int i=0;i<n;i++) cin>>v[i];
+  	
+  	
+  	int m;  cin>>m;
+  	vector<vector<int>> q;
+  	vector<int> ans(m);
+  	
+  	
+  	for(int i=0;i<m;i++){
+  	  
+  	  int l,r,b;  cin>>l>>r; l--; r--;
+  	  
+  	  b = l/size;
+  	  
+  	  q.push_back({b,l,r,i});
+  	  
+  	}
+  	
+  	
+  	sort(q.begin(), q.end(), comp);
+  	
+  	
+  	int l = 0,r = n-1,ms = -1;
+  	int co = 0;
+  	
+  	for(int i=0;i<m;i++){
+  	  
+  	  int idx = q[i][3];
+  	  int bl = q[i][0];
+  	  int l1 = q[i][1];
+  	  int r1 = q[i][2];
+  	  
+  	  
+  	  if( ms == -1 || ms != bl  ){
+  	    
+  	    for(int j=l;j<=r;j++) dp[ v[j] ] = 0;
+  	    
+  	    ms = bl;
+  	    l = l1 ;  r = r1;
+  	    co = 0;
+  	    
+  	    for(int j=l;j<=r;j++){
+  	      
+  	      if( dp[ v[j] ] == 0 ) co++;
+  	      dp[v[j]]++;
+  	      
+  	    }
+  	    
+  	    ans[idx] = co;
+  	    continue;
+  	    
+  	  }
+  	  
+  	  if( l1 <= l )
+  	  for(int j=l1;j<l;j++){
+  	    
+  	    if( dp[ v[j] ] == 0 ) co++;
+  	    dp[v[j]]++;
+  	    
+  	  }
+  	  
+  	  
+  	  if( l1 > l )
+  	  for(int j=l;j<l1;j++){
+  	    
+  	    if( dp[ v[j] ] == 1 ) co--;
+  	    dp[v[j]]--;
+  	    
+  	  }
+  	  
+  	  for(int j=r+1;j<=r1;j++){
+  	    
+  	    if( dp[ v[j] ] == 0 ) co++;
+  	    dp[v[j]]++;
+  	    
+  	  }
+  	  
+  	  l=l1;
+  	  r=r1;
+  	  
+  	  ans[idx] = co;
+  	  
+  	}
+  	
+  	for(int i=0;i<m;i++){
+  	  cout<<ans[i]<<endl;
+  	}
+  	
+    return 0;
+}
