@@ -1,0 +1,70 @@
+https://atcoder.jp/contests/dp/tasks/dp_r 
+https://leetcode.com/problems/total-characters-in-string-after-transformations-ii/description/
+
+
+
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+#define MOD 1000000007
+
+vector<vector<ll>> mtxmul(vector<vector<ll>>& A, vector<vector<ll>>& B) {
+    ll a = A.size(), b = 0;
+    if (a) b = A[0].size();
+    ll x = B.size(), y = 0;
+    if (x) y = B[0].size();
+    if (b != x) return vector<vector<ll>> {};
+    vector<vector<ll>> C(a, vector<ll>(b, 0));
+    for (ll i=0; i<a; i++) {
+        for (ll j=0; j<y; j++) {
+            for (ll k=0; k<b; k++) 
+                C[i][j] = (C[i][j] + (A[i][k] * B[k][j]) % MOD) % MOD;
+        }
+    }
+    return C;
+}
+
+vector<vector<ll>> mxp(vector<vector<ll>>& A, ll e = MOD - 2, ll m = MOD) {
+    ll n = A.size();
+    vector<vector<ll>> P(n, vector<ll>(n, 0));
+    for (ll i=0; i<n; i++)
+        P[i][i] = 1;
+
+    while (e) {
+        if (e&1) {
+            P = mtxmul(A, P);
+        }
+        A = mtxmul(A, A);
+        e >>= 1;
+    }
+    return P;
+}
+
+
+void solve(ll _t) {
+    ll n, k; cin >> n >> k;
+    vector<vector<ll>> adj(n, vector<ll>(n, 0));
+    for (ll i=0; i<n; i++) {
+        for (ll j=0; j<n; j++) {
+            int x; cin >> x; 
+            adj[i][j] = x;
+        }
+    }
+    adj = mxp(adj, k);
+    vector<vector<ll>> base(n, vector<ll>(1, 1));
+    vector<vector<ll>> ans;
+    ans = mtxmul(adj, base);
+    
+    ll ways = 0;
+    for (ll i=0; i<ans.size(); i++)
+        ways = (ways + ans[i][0]) % MOD;
+    cout << ways << endl;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false); cin.tie(nullptr);
+    solve(1);
+    return 0;
+}
